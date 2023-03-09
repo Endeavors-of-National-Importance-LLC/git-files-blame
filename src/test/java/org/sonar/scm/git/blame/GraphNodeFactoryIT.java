@@ -46,7 +46,7 @@ public class GraphNodeFactoryIT extends AbstractGitIT {
     Files.createSymbolicLink(baseDir.resolve(symlinkName), baseDir.resolve(fileName));
     commit(fileName, symlinkName);
 
-    GraphNodeFactory underTest = new GraphNodeFactory(git.getRepository(), null);
+    GraphNodeFactory underTest = new GraphNodeFactory(null);
     TreeWalk treeWalk = new TreeWalk(git.getRepository().newObjectReader());
     CommitGraphNode commit = underTest.createForCommit(treeWalk, getHead());
 
@@ -58,7 +58,7 @@ public class GraphNodeFactoryIT extends AbstractGitIT {
     createFile(baseDir, "fileA", "line1");
     createFile(baseDir, "fileB", "line2");
 
-    GraphNodeFactory underTest = new GraphNodeFactory(git.getRepository(), null);
+    GraphNodeFactory underTest = new GraphNodeFactory(null);
     TreeWalk treeWalk = new TreeWalk(git.getRepository().newObjectReader());
     RevCommit parent = mock(RevCommit.class);
     GraphNode commit = underTest.createForWorkingDir(treeWalk, parent);

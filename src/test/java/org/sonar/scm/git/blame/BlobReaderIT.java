@@ -19,11 +19,19 @@
  */
 package org.sonar.scm.git.blame;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
+import org.assertj.core.api.Assertions;
 import org.eclipse.jgit.lib.ObjectId;
 import org.eclipse.jgit.lib.ObjectReader;
 import org.junit.Assert;
 import org.junit.Test;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -37,5 +45,18 @@ public class BlobReaderIT extends AbstractGitIT {
     when(fc.getOriginalPath()).thenReturn("invalid");
 
     Assert.assertThrows(IllegalStateException.class, () -> reader.loadText(objectReader, fc));
+  }
+
+  @Test
+  public void loadText_whenWorkDirectoryHasDirectories_thenIgnoreDirs() throws IOException {
+    Path fileInDir = baseDir.resolve("dir/file");
+    Files.createDirectories(fileInDir.getParent());
+    Files.write(fileInDir, List.of("line1"));
+    BlobReader reader = new BlobReader(git.getRepository());
+    ObjectReader objectReader = git.getRepository().newObjectReader();
+    FileCandidate fc = mock(FileCandidate.class);
+    when(fc.getBlob()).thenReturn(ObjectId.zeroId());
+    when(fc.getOriginalPath()).thenReturn("dir/file");
+    assertThatNoException().isThrownBy(() -> reader.loadText(objectReader, fc));
   }
 }

@@ -37,7 +37,7 @@ public class GraphNodeFactoryTest {
 
   @Test
   public void create_whenCommitNotIncludedInPathsToBlame_thenReturnNoFiles() throws IOException {
-    GraphNodeFactory statefulCommitFactory = new GraphNodeFactory(repo, Set.of("path"));
+    GraphNodeFactory statefulCommitFactory = new GraphNodeFactory(Set.of("path"));
 
     TreeWalk treeWalk = mock(TreeWalk.class);
     when(treeWalk.next()).thenReturn(true).thenReturn(false);
@@ -50,7 +50,7 @@ public class GraphNodeFactoryTest {
 
   @Test
   public void create_whenCommitIncludedInPathsToBlame_thenReturnOneFile() throws IOException {
-    GraphNodeFactory statefulCommitFactory = new GraphNodeFactory(repo, Set.of("path"));
+    GraphNodeFactory statefulCommitFactory = new GraphNodeFactory(Set.of("path"));
 
     TreeWalk treeWalk = mock(TreeWalk.class);
     when(treeWalk.next()).thenReturn(true).thenReturn(false);
@@ -64,7 +64,7 @@ public class GraphNodeFactoryTest {
 
   @Test
   public void create_whenNoFilesToBlame_thenReturnOneFile() throws IOException {
-    GraphNodeFactory statefulCommitFactory = new GraphNodeFactory(repo, null);
+    GraphNodeFactory statefulCommitFactory = new GraphNodeFactory(null);
 
     TreeWalk treeWalk = mock(TreeWalk.class);
     when(treeWalk.next()).thenReturn(true).thenReturn(false);

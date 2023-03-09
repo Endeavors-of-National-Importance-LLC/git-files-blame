@@ -118,7 +118,7 @@ public class RepositoryBlameCommand extends GitCommand<BlameResult> {
         return blameResult;
       }
 
-      GraphNodeFactory graphNodeFactory = new GraphNodeFactory(repo, filePaths);
+      GraphNodeFactory graphNodeFactory = new GraphNodeFactory(filePaths);
       BlameGenerator blameGenerator = new BlameGenerator(repo, fileBlamer, graphNodeFactory, progressCallBack);
       blameGenerator.generateBlame(startCommit);
     } catch (IOException e) {

@@ -36,11 +36,9 @@ import static org.eclipse.jgit.lib.FileMode.TYPE_FILE;
 import static org.eclipse.jgit.lib.FileMode.TYPE_MASK;
 
 public class GraphNodeFactory {
-  private final Repository repository;
   private final Set<String> filePathsToBlame;
 
-  public GraphNodeFactory(Repository repository, @Nullable Set<String> filePathsToBlame) {
-    this.repository = repository;
+  public GraphNodeFactory(@Nullable Set<String> filePathsToBlame) {
     this.filePathsToBlame = filePathsToBlame;
   }
 
@@ -71,20 +69,20 @@ public class GraphNodeFactory {
 
   public GraphNode createForWorkingDir(TreeWalk treeWalk, RevCommit parentCommit) throws IOException {
     Objects.requireNonNull(parentCommit);
+    MutableObjectId idBuf = new MutableObjectId();
     List<FileCandidate> files = new ArrayList<>();
 
     treeWalk.setRecursive(true);
-    treeWalk.reset();
-    treeWalk.addTree(new FileTreeIterator(repository));
+    treeWalk.reset(parentCommit.getTree());
 
     while (treeWalk.next()) {
-      if (filePathsToBlame != null && !filePathsToBlame.contains(treeWalk.getPathString())) {
+      if ((filePathsToBlame != null && !filePathsToBlame.contains(treeWalk.getPathString()))
+        || !isFile(treeWalk.getRawMode(0))) {
         continue;
       }
-      if (!isFile(treeWalk.getRawMode(0))) {
-        continue;
-      }
-      files.add(new FileCandidate(treeWalk.getPathString(), treeWalk.getPathString(), ObjectId.zeroId()));
+
+      treeWalk.getObjectId(idBuf, 0);
+      files.add(new FileCandidate(treeWalk.getPathString(), treeWalk.getPathString(), idBuf.toObjectId()));
 
     }
     return new WorkDirGraphNode(parentCommit, files);
