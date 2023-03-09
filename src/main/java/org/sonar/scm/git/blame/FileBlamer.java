@@ -123,7 +123,7 @@ public class FileBlamer {
     for (int i = 0; i < parentCommits.size(); i++) {
       Set<String> diffNewPaths = fileTreeDiffs.get(i).stream().map(DiffFile::getNewPath).collect(Collectors.toSet());
       for (FileCandidate f : child.getAllFiles()) {
-        if (!diffNewPaths.contains(f.getPath())) {
+        if (!diffNewPaths.contains(f.getPath()) && f.getRegionList() != null) {
           // if file wasn't modified, it means it is unmodified. Move it to the parent.
           moveFileToParent(parentStatefulCommits.get(i), f, f.getPath());
         }
@@ -135,7 +135,7 @@ public class FileBlamer {
       for (DiffFile diffFile : fileTreeDiffs.get(i)) {
         Collection<FileCandidate> fileCandidates = child.getFilesByPath(diffFile.getNewPath());
         for (FileCandidate f : fileCandidates) {
-          if (f.getBlob().equals(diffFile.getOldObjectId())) {
+          if (f.getBlob().equals(diffFile.getOldObjectId()) && f.getRegionList() != null) {
             moveFileToParent(parentStatefulCommits.get(i), f, diffFile.getOldPath());
           }
         }
@@ -168,7 +168,7 @@ public class FileBlamer {
       if (file.getOldPath() != null) {
         // added files don't have an old path
         child.getFilesByPath(file.getNewPath())
-          .forEach(modifiedFile -> tasks.add(executor.submit(() -> splitBlameWithParent(file.getOldPath(), file.getOldObjectId(), modifiedFile))));
+          .forEach(modifiedFile -> tasks.add(executor.submit(() -> splitBlameWithParent(parent.getCommit().getName(), file.getOldPath(), file.getOldObjectId(), modifiedFile))));
       }
     }
 
@@ -209,7 +209,7 @@ public class FileBlamer {
   }
 
   @CheckForNull
-  private FileCandidate splitBlameWithParent(String parentPath, ObjectId parentObjectId, FileCandidate source) {
+  private FileCandidate splitBlameWithParent(String parentCommit, String parentPath, ObjectId parentObjectId, FileCandidate source) {
     if (source.getRegionList() == null) {
       // all regions may have been moved to another parent
       return null;
